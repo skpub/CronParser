@@ -1,12 +1,16 @@
 package org.sk_dev;
 
 public class VPtr<T> {
-    private T v;
-    private VPtr<T> next;
+    T v;
+    VPtr<T> next;
 
     public VPtr(T v) {
         this.v = v;
         this.next = this;
+    }
+    public VPtr(T v, VPtr<T> next) {
+        this.v = v;
+        this.next = next;
     }
 
     public T get() {

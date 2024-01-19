@@ -1,8 +1,10 @@
 package org.sk_dev;
 
+import java.util.Optional;
+
 public class Main {
     public static void main (String[] args) {
-        Cron cron = new Cron("3,2,7 3 3-9 3 10");
+        Cron cron = new Cron("/10 7 12-16 * 1,2,3,4");
         System.out.println(cron.toString());
     }
 }

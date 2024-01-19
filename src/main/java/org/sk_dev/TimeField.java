@@ -8,14 +8,14 @@ public class TimeField {
     private byte max;
     private byte size;
 
-    private Optional<VPtr<Byte>> first;
-    private Optional<VPtr<Byte>> current;
+    private RingList<Byte> first;
+    private RingList<Byte> current;
 
     public TimeField(byte size, byte min, byte max, String str) {
         this.min = min;
         this.max = max;
         this.size = size;
-        this.first = Optional.empty();
+        this.first = new RingList<>();
         this.current = this.first;
         str2TF(str);
     }
@@ -42,13 +42,13 @@ public class TimeField {
                 // so,
                 break;
             default:
-                System.out.println("\n_START_");
-                System.out.println("    motomoto: " + str);
+//                System.out.println("\n_START_");
+//                System.out.println("    motomoto: " + str);
                 // str: "2, /10, 7-9"
                 Arrays.stream(str.split(","))
 //                    .map(withSpaceMaybe -> withSpaceMaybe.replaceAll(" ", ""))
                     .forEach(bunch -> {
-                        System.out.println("        " + bunch);
+//                        System.out.println("        " + bunch);
                         // bunch: "2", "/10", "7-9"
                         if (bunch.contains("-")) {
                             // bunch: "7-9"
@@ -66,7 +66,7 @@ public class TimeField {
                                 if (from < this.min || this.max < to) {
                                     throw new IllegalArgumentException();
                                 }
-                                for (byte i = from; i < to; i++) {
+                                for (byte i = from; i <= to; i++) {
                                     add(i);
                                 }
                             }
@@ -78,7 +78,7 @@ public class TimeField {
                             } catch (NumberFormatException e) {
                                 throw new NumberFormatException();
                             }
-                            for (byte i = 0; i < this.max; i *= mod) {
+                            for (byte i = 0; i < this.max; i += mod) {
                                 add(i);
                             }
                         } else {
@@ -100,30 +100,10 @@ public class TimeField {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        this.first.ifPresentOrElse(
-            p -> {
-                VPtr<Byte> ptr = p;
-                for (;;) {
-                    sb.append(p.get());
-                    p.nextElem();
-                }
-            },
-            () -> {}
-        );
-        return sb.toString();
+        return first.toString();
     }
 
     private void add(byte v){
-        if (this.current.isEmpty()) {
-            // current  -> next
-            // empty    -> null
-            this.current = Optional.of(new VPtr<Byte>(v));
-        } else {
-            // current  -> next
-            // value    -> empty
-            this.current.get().add(v);
-        }
-        System.out.println("HAITTERU: " + current.get().get());
+        this.first.add(v);
     }
 }
