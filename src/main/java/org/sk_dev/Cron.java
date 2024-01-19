@@ -11,16 +11,30 @@ public class Cron {
     TimeField months;
 
     public Cron(String cronStr) {
-        mins =      new TimeField((byte)60, (byte)0, (byte)59);
-        hours =     new TimeField((byte)24, (byte)0, (byte)23);
-        days =      new TimeField((byte)31, (byte)1, (byte)31);
-        weeks =     new TimeField((byte)0,  (byte)0, (byte)6);
-        months =    new TimeField((byte)12, (byte)1, (byte)12);
-
-
+        String[] cronSettings = cronStr.split(" ");
+        if (cronSettings.length != 5) {
+            throw new IllegalArgumentException();
+        } else {
+            this.mins =      new TimeField((byte)60, (byte)0, (byte)59, cronSettings[0]);
+            this.hours =     new TimeField((byte)24, (byte)0, (byte)23, cronSettings[1]);
+            this.days =      new TimeField((byte)31, (byte)1, (byte)31, cronSettings[2]);
+            this.weeks =     new TimeField((byte)0,  (byte)0, (byte)6,  cronSettings[3]);
+            this.months =    new TimeField((byte)12, (byte)1, (byte)12, cronSettings[4]);
+        }
     }
 
-    private void parse(String cronStr) {
-        Arrays.stream(cronStr.split(",")).is
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(mins.toString());
+        sb.append(" ");
+        sb.append(hours.toString());
+        sb.append(" ");
+        sb.append(days.toString());
+        sb.append(" ");
+        sb.append(weeks.toString());
+        sb.append(" ");
+        sb.append(months.toString());
+        sb.append(" ");
+        return sb.toString();
     }
 }
