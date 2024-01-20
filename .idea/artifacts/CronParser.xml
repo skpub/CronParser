@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CronParser">
+    <output-path>$PROJECT_DIR$/out/artifacts/CronParser</output-path>
+    <root id="archive" name="CronParser.jar">
+      <element id="module-output" name="CronParser.main" />
+      <element id="module-source" name="CronParser.main" />
+    </root>
+  </artifact>
+</component>

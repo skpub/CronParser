@@ -5,15 +5,15 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Optional;
 
-public class RingList<T extends Serializable> {
+class RingList<T extends Serializable> {
     private Optional<VPtr<T>> head;
     private VPtr<T> index = null;
 
-    public RingList() {
+    RingList() {
         this.head = Optional.empty();
     }
 
-    public void add(T v) {
+    void add(T v) {
         if (this.head.isEmpty()) {
             this.head = Optional.of(new VPtr<>(v));
             this.index = this.head.get();

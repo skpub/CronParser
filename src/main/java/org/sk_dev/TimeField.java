@@ -3,7 +3,7 @@ package org.sk_dev;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class TimeField {
+class TimeField {
     private byte min;
     private byte max;
     private byte size;
@@ -11,7 +11,7 @@ public class TimeField {
     private RingList<Byte> first;
     private RingList<Byte> current;
 
-    public TimeField(byte size, byte min, byte max, String str) {
+    TimeField(byte size, byte min, byte max, String str) {
         this.min = min;
         this.max = max;
         this.size = size;
@@ -20,21 +20,6 @@ public class TimeField {
         str2TF(str);
     }
 
-//    private void add(String str) throws NumberFormatException, IllegalArgumentException {
-//        byte v;
-//        try {
-//            v = Byte.parseByte(str);
-//        }
-//        catch (NumberFormatException e){
-//            throw new NumberFormatException();
-//        }
-//        if (v < this.min || this.max < v) {
-//            throw new IllegalArgumentException();
-//        } else {
-//            this.current.add(v);
-//        }
-//    }
-
     private void str2TF(String str) throws IllegalArgumentException, NumberFormatException {
         switch (str) {
             case "*":
@@ -42,13 +27,9 @@ public class TimeField {
                 // so,
                 break;
             default:
-//                System.out.println("\n_START_");
-//                System.out.println("    motomoto: " + str);
                 // str: "2, /10, 7-9"
                 Arrays.stream(str.split(","))
-//                    .map(withSpaceMaybe -> withSpaceMaybe.replaceAll(" ", ""))
                     .forEach(bunch -> {
-//                        System.out.println("        " + bunch);
                         // bunch: "2", "/10", "7-9"
                         if (bunch.contains("-")) {
                             // bunch: "7-9"
