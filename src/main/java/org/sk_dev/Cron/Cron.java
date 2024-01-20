@@ -1,7 +1,4 @@
-package org.sk_dev;
-
-import java.util.Arrays;
-import java.util.Optional;
+package org.sk_dev.Cron;
 
 public class Cron {
     TimeField mins;
@@ -15,11 +12,11 @@ public class Cron {
         if (cronSettings.length != 5) {
             throw new IllegalArgumentException();
         } else {
-            this.mins =      new TimeField((byte)60, (byte)0, (byte)59, cronSettings[0]);
-            this.hours =     new TimeField((byte)24, (byte)0, (byte)23, cronSettings[1]);
-            this.days =      new TimeField((byte)31, (byte)1, (byte)31, cronSettings[2]);
-            this.weeks =     new TimeField((byte)0,  (byte)0, (byte)6,  cronSettings[3]);
-            this.months =    new TimeField((byte)12, (byte)1, (byte)12, cronSettings[4]);
+            this.mins =      new TimeField((byte)0, (byte)59, cronSettings[0]);
+            this.hours =     new TimeField((byte)0, (byte)23, cronSettings[1]);
+            this.days =      new TimeField((byte)1, (byte)31, cronSettings[2]);
+            this.weeks =     new TimeField((byte)0, (byte)6,  cronSettings[3]);
+            this.months =    new TimeField((byte)1, (byte)12, cronSettings[4]);
         }
     }
 
