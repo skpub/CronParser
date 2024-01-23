@@ -1,27 +1,33 @@
 package org.sk_dev.Cron;
 
-import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.*;
 
 class TimeField {
     private final byte min;
     private final byte max;
-    private final BitSet field;
+    final BitSet dial;
     // Bucket data.
     // ex.  0b10010011
     //      -> 7, 4, 1, 0
 
+    public byte getMin() {
+        return this.min;
+    }
+
+    public byte getMax() {
+        return this.max;
+    }
+
     TimeField(byte min, byte max, String str) {
         this.min = min;
         this.max = max;
-        this.field = new BitSet(this.max-this.min+1);
+        this.dial = new BitSet(this.max-this.min+1);
         str2TF(str);
     }
 
     private void str2TF(String str) throws IllegalArgumentException, NumberFormatException {
         if (str.equals("*")) {
-            this.field.flip(0, this.max-this.min+1);
+            this.dial.flip(0, this.max-this.min+1);
         } else {
             // str: "2,/10,7-9,0-30/3"
             Arrays.stream(str.split(","))
@@ -40,7 +46,7 @@ class TimeField {
                                 throw new NumberFormatException();
                             }
                             for (byte i = from; i <= to; i+=mod) {
-                                field.set(i-this.min);
+                                dial.set(i-this.min);
                             }
                         } else {
                             // bunch: "7-9"
@@ -59,7 +65,7 @@ class TimeField {
                                     throw new IllegalArgumentException();
                                 }
                                 for (byte i = from; i <= to; i++) {
-                                    field.set(i-this.min);
+                                    dial.set(i-this.min);
                                 }
                             }
                         }
@@ -72,7 +78,7 @@ class TimeField {
                             throw new NumberFormatException();
                         }
                         for (byte i = this.min; i <= this.max; i += mod) {
-                            field.set(i-this.min);
+                            dial.set(i-this.min);
                         }
                     } else {
                         // bunch: "2"
@@ -85,7 +91,7 @@ class TimeField {
                         if (v < this.min || this.max < v) {
                             throw new IllegalArgumentException();
                         } else {
-                            field.set(v-this.min);
+                            dial.set(v-this.min);
                         }
                     }
                 });
@@ -93,8 +99,26 @@ class TimeField {
     }
 
     public String toString() {
-        return this.field.stream()
+        return this.dial.stream()
             .mapToObj(v -> String.valueOf(v+this.min))
             .reduce("", (acc,v)-> acc + v + ",");
+    }
+
+    public byte getBiggestElem() {
+        return (byte) (this.dial.previousSetBit(this.max-this.min) + this.min);
+    }
+
+    public byte size() {
+        return (byte) (this.max - this.min + 1);
+    }
+
+    public byte getSmallestElem() {
+        return (byte) (this.dial.nextSetBit(0) + this.min);
+    }
+
+    OptionalInt rippleCarryNext(byte now) {
+        return this.dial.stream().filter(v -> v+this.min >= now).findFirst();
+        // Empty    -> carry-over occurs
+        // Some(v)  -> no carry-over occurs
     }
 }

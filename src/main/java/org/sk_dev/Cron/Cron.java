@@ -1,36 +1,37 @@
 package org.sk_dev.Cron;
 
 public class Cron {
-    TimeField mins;
-    TimeField hours;
-    TimeField days;
-    TimeField weeks;
-    TimeField months;
+    TimeField min;
+    TimeField hour;
+    TimeField day;
+    TimeField week;
+    TimeField month;
+
 
     public Cron(String cronStr) {
         String[] cronSettings = cronStr.split(" ");
         if (cronSettings.length != 5) {
             throw new IllegalArgumentException();
         } else {
-            this.mins =      new TimeField((byte)0, (byte)59, cronSettings[0]);
-            this.hours =     new TimeField((byte)0, (byte)23, cronSettings[1]);
-            this.days =      new TimeField((byte)1, (byte)31, cronSettings[2]);
-            this.weeks =     new TimeField((byte)0, (byte)6,  cronSettings[3]);
-            this.months =    new TimeField((byte)1, (byte)12, cronSettings[4]);
+            min     = new TimeField((byte)0, (byte)59, cronSettings[0]);
+            hour    = new TimeField((byte)0, (byte)23, cronSettings[1]);
+            day     = new TimeField((byte)1, (byte)31, cronSettings[2]);
+            week    = new TimeField((byte)0, (byte)6,  cronSettings[3]);
+            month   = new TimeField((byte)1, (byte)12, cronSettings[4]);
         }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(mins.toString());
+        sb.append(min.toString());
         sb.append(" ");
-        sb.append(hours.toString());
+        sb.append(hour.toString());
         sb.append(" ");
-        sb.append(days.toString());
+        sb.append(day.toString());
         sb.append(" ");
-        sb.append(weeks.toString());
+        sb.append(week.toString());
         sb.append(" ");
-        sb.append(months.toString());
+        sb.append(month.toString());
         sb.append(" ");
         return sb.toString();
     }
