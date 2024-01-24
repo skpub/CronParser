@@ -1,11 +1,11 @@
 package org.sk_dev.Cron;
 
-class ClockHand implements ClockWithHand<Byte> {
+class SimpleDial implements DialWithHand<Byte> {
     private TimeField v;
     private Byte hand;
-    ClockHand(TimeField v) {
+    SimpleDial(TimeField v, Byte hand) {
         this.v = v;
-        this.hand = this.v.getSmallestElem();
+        this.hand = hand;
     }
     @Override
     public Byte hand() {
@@ -20,7 +20,7 @@ class ClockHand implements ClockWithHand<Byte> {
             // Carry-over occurred.
         } else { // NO carry-over occurred.
             this.hand = (byte) this.v.dial.stream()
-                .filter(v -> v>this.hand)
+                .filter(v -> v > this.hand)
                 .findFirst()
                 .orElseThrow();
             return false;

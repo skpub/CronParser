@@ -98,6 +98,11 @@ class TimeField {
         }
     }
 
+
+    byte quasiMetric(byte from, byte to) {
+        return (byte) ((to - from) % this.size());
+    }
+
     public String toString() {
         return this.dial.stream()
             .mapToObj(v -> String.valueOf(v+this.min))

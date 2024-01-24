@@ -1,16 +1,19 @@
 package org.sk_dev.Cron;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Set;
 
 public class CronNavigator {
     private Cron cron;
     private int year;
-    private ClockHand min;
-    private ClockHand hour;
-    private ClockHand day;
-    private ClockHand month;
+    private DialWithHand<Byte> min;
+    private DialWithHand<Byte> hour;
+    private DayDial day;
+    private DialWithHand<Byte> month;
     private LocalDate currentDate;
 
 
@@ -24,16 +27,23 @@ public class CronNavigator {
             now.getHour(),
             now.getMinute()
         );
-        this.min    = new ClockHand(this.cron.min);
-        this.hour   = new ClockHand(this.cron.hour);
-        this.day    = new ClockHand(this.cron.day);
-        this.month  = new ClockHand(this.cron.month);
 
-        byte now_year   = (byte) now.getYear();
-        byte now_month  = (byte) now.getMonth().getValue();
-        byte now_day    = (byte) now.getDayOfMonth();
-        byte now_week   = (byte) now.getDayOfWeek().getValue();
-        byte now_hour   = (byte) now.getHour();
-        byte now_min    = (byte) now.getMinute();
+        this.year   = now.getYear();
+        this.min    = new SimpleDial(this.cron.min,     (byte) now.getMinute());
+        this.hour   = new SimpleDial(this.cron.hour,    (byte) now.getHour());
+        this.month  = new SimpleDial(this.cron.month,   (byte) now.getMonth().getValue());
+        this.day    = new DayDial(
+            this.cron.day, this.cron.week,
+            (byte) now.getDayOfMonth(), (byte) now.getDayOfWeek().getValue()
+        );
+    }
+
+    public String toString() {
+        LocalDateTime nowHandDate =  LocalDateTime.of(
+            year, month.hand(), day.hand(), hour.hand(), min.hand()
+        );
+        return nowHandDate.format(
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
+        ) + "(" + DayOfWeek.of(day.weekHand()) + ")";
     }
 }
