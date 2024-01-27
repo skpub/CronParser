@@ -1,14 +1,11 @@
 package org.sk_dev.Cron;
 
-import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CronNavigator {
     class DayDial implements DialWithHand<Byte>{
@@ -38,6 +35,63 @@ public class CronNavigator {
 
         @Override
         public boolean tick() {
+            System.out.println("PRE  dayHand:  " + this.dayHand);
+            System.out.println("PRE  weekHand: " + this.weekHand);
+            byte dayOfMonthNext = (byte) this.dayM.dial.stream()
+                .filter(v -> v > this.dayHand)
+                .filter(v -> this.isValidDate(v))
+                .findFirst()
+                .orElse(this.dayM.getMin());
+            byte dayOfMonthSub = this.dayM.quasiMetric(this.dayHand, dayOfMonthNext);
+
+            // Search for the first valid day of the week between this.dayHand and dayOfMonthNext;
+            byte i = (byte) (this.dayHand + 1);
+            System.out.println("i one: " + i);
+            if (this.dayHand < dayOfMonthNext) {
+                System.out.println("called first");
+                while (
+                    this.dayW.dial.get(DialWithHand.MinNonNegReminder(i, this.dayW.size()))
+                        & this.isValidDate(DialWithHand.MinNonNegReminder(i, this.dayW.size()))
+                        | i >= dayOfMonthNext
+                ) i++;
+            } else {
+                System.out.println("called second");
+                if (this.dayHand >= this.dayM.getMax()) {
+                    System.out.println("called second first");
+                    for (i = this.dayM.getMin()
+                        ;this.dayW.dial.get(DialWithHand.MinNonNegReminder(i, this.dayW.size()))
+                              | i >= dayOfMonthNext
+                        ;i++) {}
+                } else {
+                    System.out.println("called second second");
+                    for (i = (byte) (this.dayHand + 1)
+                        ;this.dayW.dial.get(DialWithHand.MinNonNegReminder(i, this.dayW.size()))
+                            | i >= this.dayM.getMax()
+                        ;i++) {break;}
+                    for (i = this.dayM.getMin()
+                        ;this.dayW.dial.get(DialWithHand.MinNonNegReminder(i, this.dayW.size()))
+                            | i >= dayOfMonthNext
+                    ;i++) {}
+                }
+            }
+            // i is the next day.
+            boolean carry = this.dayHand > i;
+            this.weekHand = i > this.dayHand ?
+                DialWithHand.MinNonNegReminder(
+                    this.weekHand + i - this.dayHand, this.dayW.size()) :
+                DialWithHand.MinNonNegReminder(
+                    this.weekHand + i - this.dayHand + this.realMax() - 1, this.dayW.size());
+
+            this.dayHand = i;
+
+            System.out.println("POST dayHand:  " + this.dayHand);
+            System.out.println("POST weekHand: " + this.weekHand);
+
+            return carry;
+        }
+
+//        @Override
+        public boolean tick2() {
             // Of course preDay is real value - min;
             byte preDay = this.dayHand;
             byte dayMNext = (byte) (this.dayM.dial.stream()
