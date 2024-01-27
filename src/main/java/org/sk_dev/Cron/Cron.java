@@ -16,7 +16,7 @@ public class Cron {
             min     = new TimeField((byte)0, (byte)59, cronSettings[0]);
             hour    = new TimeField((byte)0, (byte)23, cronSettings[1]);
             day     = new TimeField((byte)1, (byte)31, cronSettings[2]);
-            week    = new TimeField((byte)0, (byte)6,  cronSettings[3]);
+            week    = new TimeField((byte)1, (byte)7,  cronSettings[3]);
             month   = new TimeField((byte)1, (byte)12, cronSettings[4]);
         }
     }

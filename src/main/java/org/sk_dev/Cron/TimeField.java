@@ -29,10 +29,10 @@ class TimeField {
         if (str.equals("*")) {
             this.dial.flip(0, this.max-this.min+1);
         } else {
-            // str: "2,/10,7-9,0-30/3"
+            // str: "2,*/10,7-9,0-30/3"
             Arrays.stream(str.split(","))
                 .forEach(bunch -> {
-                    // bunch: "2", "/10", "7-9", "0-30/3"
+                    // bunch: "2", "*/10", "7-9", "0-30/3"
                     if (bunch.contains("-")) {
                         // bunch: "7-9", "0-30/3"
                         if (bunch.contains("/")) {
@@ -70,14 +70,15 @@ class TimeField {
                             }
                         }
                     } else if (bunch.contains("/")) {
-                        // bunch: "/10"
+                        // bunch: "*/10"
                         byte mod;
                         try {
                             mod = Byte.parseByte(bunch.split("/")[1]);
                         } catch (NumberFormatException e) {
                             throw new NumberFormatException();
                         }
-                        for (byte i = this.min; i <= this.max; i += mod) {
+                        for (byte i = 0; i <= this.max; i += mod) {
+                            if (i < this.min) continue;
                             dial.set(i-this.min);
                         }
                     } else {
@@ -89,6 +90,10 @@ class TimeField {
                             throw new NumberFormatException();
                         }
                         if (v < this.min || this.max < v) {
+                            System.err.println(
+                                "expected range is [" + this.min + "," + this.max +"].\n"
+                                + "but " + v + " were passed."
+                            );
                             throw new IllegalArgumentException();
                         } else {
                             dial.set(v-this.min);
@@ -100,7 +105,10 @@ class TimeField {
 
 
     byte quasiMetric(byte from, byte to) {
-        return (byte) ((to - from) % this.size());
+        return DialWithHand.MinNonNegReminder(
+            to - from,
+            this.size()
+        );
     }
 
     public String toString() {
@@ -119,11 +127,5 @@ class TimeField {
 
     public byte getSmallestElem() {
         return (byte) (this.dial.nextSetBit(0) + this.min);
-    }
-
-    OptionalInt rippleCarryNext(byte now) {
-        return this.dial.stream().filter(v -> v+this.min >= now).findFirst();
-        // Empty    -> carry-over occurs
-        // Some(v)  -> no carry-over occurs
     }
 }

@@ -14,7 +14,7 @@ class SimpleDial implements DialWithHand<Byte> {
 
     @Override
     public boolean tick() {
-        if (this.v.getBiggestElem() < this.hand) {
+        if (this.v.getBiggestElem() <= this.hand + 1) {
             this.hand = this.v.getSmallestElem();
             return true;
             // Carry-over occurred.
@@ -25,6 +25,10 @@ class SimpleDial implements DialWithHand<Byte> {
                 .orElseThrow();
             return false;
         }
+    }
+
+    public void reset() {
+        this.hand = this.v.getSmallestElem();
     }
 
     @Override
