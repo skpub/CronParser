@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CronNavigatorTest {
     @Test
     void TestCronNavigator() {
-        Cron cron = new Cron("*/30 */8 */7 1,4, *");
+        Cron cron = new Cron("*/30 */8 */7 * 1,4");
         System.out.println("cron: " + cron.toString());
 
         CronNavigator cronNav = new CronNavigator(cron);

@@ -16,8 +16,8 @@ public class Cron {
             min     = new TimeField((byte)0, (byte)59, cronSettings[0]);
             hour    = new TimeField((byte)0, (byte)23, cronSettings[1]);
             day     = new TimeField((byte)1, (byte)31, cronSettings[2]);
-            week    = new TimeField((byte)1, (byte)7,  cronSettings[3]);
-            month   = new TimeField((byte)1, (byte)12, cronSettings[4]);
+            month   = new TimeField((byte)1, (byte)12, cronSettings[3]);
+            week    = new TimeField((byte)1, (byte)7,  cronSettings[4]);
         }
     }
 
@@ -29,9 +29,9 @@ public class Cron {
         sb.append(" ");
         sb.append(day.toString());
         sb.append(" ");
-        sb.append(week.toString());
-        sb.append(" ");
         sb.append(month.toString());
+        sb.append(" ");
+        sb.append(week.toString());
         sb.append(" ");
         return sb.toString();
     }
