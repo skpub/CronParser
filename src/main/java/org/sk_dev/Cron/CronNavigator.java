@@ -3,135 +3,67 @@ package org.sk_dev.Cron;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.temporal.TemporalAdjusters;
 
 public class CronNavigator {
     class DayDial implements DialWithHand<Byte>{
         private final TimeField dayM;
         private final TimeField dayW;
+        private final TimeField monthField;
 
+        private LocalDate date;
         // !!! real value - min;
         private Byte dayHand;
         // !!! real value - min;
         private Byte weekHand;
 
-        DayDial(TimeField dayM, TimeField dayW, byte dayHand, byte weekHand) {
+        DayDial(TimeField dayM, TimeField dayW, TimeField monthField, LocalDate date) {
             this.dayM = dayM;
             this.dayW = dayW;
-            this.dayHand = dayHand;
-            this.weekHand = weekHand;
+            this.monthField = monthField;
+            this.date = date;
         }
 
         @Override
         public boolean isValid() {
-            return this.dayM.dial.get(this.dayHand) |
-                this.dayW.dial.get(this.weekHand);
+            return this.dayM.dial.get(this.date.getDayOfMonth() - this.dayM.getMin()) |
+                this.dayW.dial.get(this.date.getDayOfWeek().getValue() - this.dayW.getMin());
         }
 
         @Override
         public Byte hand() {
-            return (byte) (this.dayHand + this.dayM.getMin());
+            return (byte) (this.date.getDayOfMonth() - this.dayM.getMin());
         }
 
-        public byte weekHand() {
-            return this.weekHand;
+        public DayOfWeek weekHand() {
+            return this.date.getDayOfWeek();
         }
 
         @Override
         public int tick() {
-            LocalDate i = LocalDate.of(
-                CronNavigator.this.year,
-                CronNavigator.this.month.hand(),
-                this.dayHand + this.dayM.getMin()
-            );
+            LocalDate i = this.date.plusDays(1);
+            int carries = 0;
 
-            i = i.plusDays(1);
             for (;; i = i.plusDays(1)) {
+                int iMonth = i.getMonth().getValue();
+                if (!this.monthField.dial.get(iMonth - this.monthField.getMin())) {
+                    i = i.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+                    continue;
+                }
                 int iDayOfMonth = i.getDayOfMonth();
                 int iDayOfWeek = i.getDayOfWeek().getValue();
-                if (this.dayM.dial.get(iDayOfMonth - 1) |
-                    this.dayW.dial.get(iDayOfWeek - 1)
+                if (this.dayM.dial.get(iDayOfMonth - this.dayM.getMin()) |
+                    this.dayW.dial.get(iDayOfWeek - this.dayW.getMin())
                 ) {
-                    this.dayHand = (byte) (iDayOfMonth - 1);
-                    this.weekHand = (byte) (iDayOfWeek - 1);
+                    carries = i.getMonth().getValue()
+                        - this.date.getMonth().getValue();
+                    this.date = i;
                     break;
                 }
             }
-            return i.getMonth().getValue() - CronNavigator.this.month.hand();
-            /*
-
-            System.out.println("PRE  dayHand:  " + this.dayHand);
-            System.out.println("PRE  weekHand: " + this.weekHand);
-            byte dayOfMonthNext = (byte) this.dayM.dial.stream()
-                .filter(v -> v > this.dayHand)
-                .filter(v -> this.isValidDate(v))
-                .findFirst()
-                .orElse(this.dayM.getMin());
-            byte dayOfMonthSub = this.dayM.quasiMetric(this.dayHand, dayOfMonthNext);
-
-            // Search for the first valid day of the week between this.dayHand and dayOfMonthNext;
-            byte candidateOffset = Byte.MAX_VALUE;
-            for (byte i = 1; i <= dayOfMonthSub; i++) {
-                byte targetDayOfMonth = DialWithHand.MinNonNegReminder(
-                    this.dayHand + i,
-                    this.realMax()
-                );
-                byte targetDayOfWeek = DialWithHand.MinNonNegReminder(
-                    this.dayOfWeek(targetDayOfMonth),
-                    this.dayW.size()
-                );
-                System.out.println("targetDayOfMonth " + targetDayOfMonth);
-                System.out.println("targetDayOfWeek " + targetDayOfWeek);
-                if (this.dayW.dial.get(targetDayOfWeek)) {
-                    System.out.println("candidate: " + i);
-                    candidateOffset = i;
-                    break;
-                }
-            }
-            byte idealOffset = (byte) Integer.min(candidateOffset, dayOfMonthSub);
-            boolean carry = this.dayHand + idealOffset > this.realMax() - 1;
-            this.dayHand = DialWithHand.MinNonNegReminder(
-                this.dayHand + idealOffset,
-                this.realMax()
-            );
-            this.weekHand = DialWithHand.MinNonNegReminder(
-                this.weekHand + idealOffset,
-                this.dayW.size()
-            );
-            System.out.println("POST dayHand:  " + this.dayHand);
-            System.out.println("POST weekHand: " + this.weekHand);
-            return carry;
-            */
-        }
-
-        private byte dayOfWeek(byte day) {
-            return (byte) (LocalDate.of(CronNavigator.this.year,
-                    CronNavigator.this.month.hand(),
-                    day + 1)
-                .getDayOfWeek().getValue() - 1
-            );
-        }
-
-        @Override
-        public boolean next(Byte referenceValue) {
-            return false;
-        }
-
-        private byte realMax() {
-            int y = CronNavigator.this.year;
-            byte m = CronNavigator.this.month.hand();
-            return (byte) (y % 4 == 0 & ! (y % 100 == 0 & y % 400 != 0) & m == 2 ?
-                29 : m == 1 | m == 3 | m == 5 | m == 7 | m == 8 | m == 10 | m == 12 ?
-                    31 : m == 2 ?
-                        28:
-                        30
-            );
-        }
-
-        private boolean isValidDate(int dayMinusMin) {
-            return dayMinusMin + this.dayM.getMin() <= realMax();
+            return carries;
         }
 
         public void reset() {
@@ -142,12 +74,9 @@ public class CronNavigator {
         // OUTER CLASS      CronNavigator   start.
     }
     private Cron cron;
-    private int year;
     private DialWithHand<Byte> min;
     private DialWithHand<Byte> hour;
-    private DayDial day;
-    private DialWithHand<Byte> month;
-    private LocalDate currentDate;
+    private DayDial date;
 
     CronNavigator(Cron cron) {
         this.cron = cron;
@@ -160,46 +89,40 @@ public class CronNavigator {
             now.getMinute()
         );
 
-        this.year   = now.getYear();
         this.min    = new SimpleDial(this.cron.min,     (byte) now.getMinute());
         this.hour   = new SimpleDial(this.cron.hour,    (byte) now.getHour());
-        this.month  = new SimpleDial(this.cron.month,   (byte) now.getMonth().getValue());
-        this.day    = new DayDial(
-            this.cron.day, this.cron.week,
-            (byte) (now.getDayOfMonth() - 1), (byte) (now.getDayOfWeek().getValue() - 1)
+        this.date   = new DayDial(
+            this.cron.day, this.cron.week, this.cron.month,
+            LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth())
         );
     }
 
     public String toString() {
         LocalDateTime nowHandDate =  LocalDateTime.of(
-            year, month.hand(), day.hand(), hour.hand(), min.hand()
+            date.date, LocalTime.of(hour.hand(), min.hand())
         );
         return nowHandDate.format(
             DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
-        ) + "(" + DayOfWeek.of(day.weekHand() + 1) + ")";
+        ) + "(" + this.date.date.getDayOfWeek() + ")";
     }
 
     public int getYear() {
-        return this.year;
+        return this.date.date.getYear();
     }
 
     public void tick() {
-        if (this.min.tick() == 1) {
-            if (this.hour.tick() == 1) {
-                this.min.reset();
-                int monthOffset = 0;
-                if ((monthOffset = this.day.tick()) > 0) {
-                    this.hour.reset();
-                    int yearOffset = 0;
-                    for (int i = 0; i < monthOffset; i++)
-                        yearOffset += this.month.tick();
-                    if (yearOffset > 0) {
-                        this.year++;
-                        this.day.reset();
-                    }
-                } else {
-                }
-            }
-        }
+        int hourCarry = 0;
+        int minCarry = this.min.tick();
+        if (minCarry > 0)
+            hourCarry = this.hour.tick();
+        else
+            if (!this.hour.isValid())
+                hourCarry = this.hour.tick();
+
+        if (hourCarry > 0)
+            this.date.tick();
+        else
+            if (!this.date.isValid())
+                this.date.tick();
     }
 }

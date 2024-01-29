@@ -32,11 +32,6 @@ class SimpleDial implements DialWithHand<Byte> {
     }
 
     @Override
-    public boolean next(Byte referenceValue) {
-        return false;
-    }
-
-    @Override
     public boolean isValid() {
         return this.v.dial.get(this.hand);
     }

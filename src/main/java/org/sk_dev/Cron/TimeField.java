@@ -21,7 +21,7 @@ class TimeField {
     TimeField(byte min, byte max, String str) {
         this.min = min;
         this.max = max;
-        this.dial = new BitSet(this.max-this.min+1);
+        this.dial = new BitSet(this.max-this.min);
         str2TF(str);
     }
 
@@ -112,9 +112,10 @@ class TimeField {
     }
 
     public String toString() {
-        return this.dial.stream()
+        String temp = this.dial.stream()
             .mapToObj(v -> String.valueOf(v+this.min))
             .reduce("", (acc,v)-> acc + v + ",");
+        return temp.substring(0, temp.lastIndexOf(","));
     }
 
     public byte getBiggestElem() {
