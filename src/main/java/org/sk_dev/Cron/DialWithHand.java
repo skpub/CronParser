@@ -2,8 +2,9 @@ package org.sk_dev.Cron;
 
 public interface DialWithHand<T extends Comparable<T>> {
     T hand();
-    boolean tick();
+    int tick();
     boolean next(T referenceValue);
+    boolean isValid();
 
     static byte MinNonNegReminder(int a, byte b) {
         return (byte) (

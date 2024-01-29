@@ -25,6 +25,12 @@ public class CronNavigator {
         }
 
         @Override
+        public boolean isValid() {
+            return this.dayM.dial.get(this.dayHand) |
+                this.dayW.dial.get(this.weekHand);
+        }
+
+        @Override
         public Byte hand() {
             return (byte) (this.dayHand + this.dayM.getMin());
         }
@@ -34,7 +40,28 @@ public class CronNavigator {
         }
 
         @Override
-        public boolean tick() {
+        public int tick() {
+            LocalDate i = LocalDate.of(
+                CronNavigator.this.year,
+                CronNavigator.this.month.hand(),
+                this.dayHand + this.dayM.getMin()
+            );
+
+            i = i.plusDays(1);
+            for (;; i = i.plusDays(1)) {
+                int iDayOfMonth = i.getDayOfMonth();
+                int iDayOfWeek = i.getDayOfWeek().getValue();
+                if (this.dayM.dial.get(iDayOfMonth - 1) |
+                    this.dayW.dial.get(iDayOfWeek - 1)
+                ) {
+                    this.dayHand = (byte) (iDayOfMonth - 1);
+                    this.weekHand = (byte) (iDayOfWeek - 1);
+                    break;
+                }
+            }
+            return i.getMonth().getValue() - CronNavigator.this.month.hand();
+            /*
+
             System.out.println("PRE  dayHand:  " + this.dayHand);
             System.out.println("PRE  weekHand: " + this.weekHand);
             byte dayOfMonthNext = (byte) this.dayM.dial.stream()
@@ -76,6 +103,7 @@ public class CronNavigator {
             System.out.println("POST dayHand:  " + this.dayHand);
             System.out.println("POST weekHand: " + this.weekHand);
             return carry;
+            */
         }
 
         private byte dayOfWeek(byte day) {
@@ -156,12 +184,16 @@ public class CronNavigator {
     }
 
     public void tick() {
-        if (this.min.tick()) {
-            if (this.hour.tick()) {
+        if (this.min.tick() == 1) {
+            if (this.hour.tick() == 1) {
                 this.min.reset();
-                if (this.day.tick()) {
+                int monthOffset = 0;
+                if ((monthOffset = this.day.tick()) > 0) {
                     this.hour.reset();
-                    if (this.month.tick()) {
+                    int yearOffset = 0;
+                    for (int i = 0; i < monthOffset; i++)
+                        yearOffset += this.month.tick();
+                    if (yearOffset > 0) {
                         this.year++;
                         this.day.reset();
                     }
