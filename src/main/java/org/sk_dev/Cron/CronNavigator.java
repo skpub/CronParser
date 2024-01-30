@@ -95,6 +95,7 @@ public class CronNavigator {
             this.cron.day, this.cron.week, this.cron.month,
             LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth())
         );
+        this.tick();
     }
 
     public String toString() {
@@ -110,19 +111,49 @@ public class CronNavigator {
         return this.date.date.getYear();
     }
 
-    public void tick() {
+    public LocalDate getDate() {
+        return LocalDate.of(
+            this.date.date.getYear(),
+            this.date.date.getMonth().getValue(),
+            this.date.date.getDayOfMonth()
+        );
+    }
+
+    public LocalTime getTime() {
+        return LocalTime.of(
+            this.hour.hand(),
+            this.min.hand()
+        );
+    }
+
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.of(
+            this.getDate(),
+            this.getTime()
+        );
+    }
+
+    public LocalDateTime tick() {
         int hourCarry = 0;
         int minCarry = this.min.tick();
-        if (minCarry > 0)
+        if (minCarry > 0) {
             hourCarry = this.hour.tick();
-        else
-            if (!this.hour.isValid())
+        }
+        else {
+            if (!this.hour.isValid()) {
                 hourCarry = this.hour.tick();
+            }
+        }
 
-        if (hourCarry > 0)
+        if (hourCarry > 0) {
             this.date.tick();
-        else
-            if (!this.date.isValid())
+        }
+        else {
+            if (!this.date.isValid()) {
                 this.date.tick();
+            }
+        }
+
+        return this.getDateTime();
     }
 }

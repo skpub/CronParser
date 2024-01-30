@@ -37,4 +37,11 @@ class CronNavigatorTest {
             System.out.println("now + " + i + ": " + cronNav);
         }
     }
+    @Test
+    void sampleTest() {
+        Cron cron = new Cron("0 0 * * *");
+        CronNavigator cronNav = new CronNavigator(cron);
+        System.out.println(cronNav.getDateTime());
+        System.out.println(cronNav.tick());
+    }
 }
