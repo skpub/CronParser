@@ -78,7 +78,7 @@ public class CronNavigator {
     private DialWithHand<Byte> hour;
     private DayDial date;
 
-    CronNavigator(Cron cron) {
+    public CronNavigator(Cron cron) {
         this.cron = cron;
         LocalDateTime now = LocalDateTime.now().plusMinutes(1);
         LocalDateTime roundNow = LocalDateTime.of(
